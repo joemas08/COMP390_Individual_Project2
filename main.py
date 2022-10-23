@@ -12,7 +12,10 @@ def main():
     # Decoding response into JSON format
     json_content = request_response.json()
 
-    connect_to_database(database)
+    db_connection, db_cursor = connect_to_database(database)
+
+    create_all_tables(db_connection, db_cursor)
+
 
 
 if __name__ == '__main__':
