@@ -35,7 +35,7 @@ def create_table(db_connection, db_cursor, table_name):
         return f'A database error has occurred : {db_error}'
 
 
-def create_all_tables(db_connection, db_cursor):
+def create_all_region_tables(db_connection, db_cursor):
     create_table(db_connection, db_cursor, 'Africa_MiddleEast_Meteorites')
     create_table(db_connection, db_cursor, 'Europe_Meteorites')
     create_table(db_connection, db_cursor, 'Upper_Asia_Meteorites')
@@ -44,10 +44,8 @@ def create_all_tables(db_connection, db_cursor):
     create_table(db_connection, db_cursor, 'North_America_Meteorites')
     create_table(db_connection, db_cursor, 'South_America_Meteorites')
 
-    close_db(db_connection, db_cursor)
 
-
-def insert_into_region(db_connection, db_cursor, json_content):
+def insert_into_region_tables(db_connection, db_cursor, json_content):
     try:
         for meteorite in json_content:
             if len(meteorite) > 7:
@@ -67,22 +65,23 @@ def insert_into_region(db_connection, db_cursor, json_content):
 def find_region(meteorite):
     latitude = meteorite['reclat']
     longitude = meteorite['reclong']
-    regions = []
-    if -35.2 <= value_check(latitude) <= 37.6 and -17.8 <= value_check(longitude) <= 62.2:
-        regions.append('Africa_MiddleEast_Meteorites')
-    if 36 <= value_check(latitude) <= 71.1 and -24.1 <= value_check(longitude) <= 32:
-        regions.append('Europe_Meteorites')
-    if 35.8 <= value_check(latitude) <= 72.7 and 32.2 <= value_check(longitude) <= 190.4:
-        regions.append('Upper_Asia_Meteorites')
-    if -9.9 <= value_check(latitude) <= 38.6 and 58.2 <= value_check(longitude) <= 154:
-        regions.append('Lower_Asia_Meteorites')
-    if -43.8 <= value_check(latitude) <= -11.1 and 112.9 <= value_check(longitude) <= 154.3:
-        regions.append('Australia_Meteorites')
-    if 12.8 <= value_check(latitude) <= 71.5 and -168.2 <= value_check(longitude) <= -52:
-        regions.append('North_America_Meteorites')
-    if -55.8 <= value_check(latitude) <= 12.6 and -81.2 <= value_check(longitude) <= -34.4:
-        regions.append('South_America_Meteorites')
-    return regions
+    found_regions = []
+
+    # geolocation bounding box -- (left,bottom,right,top)
+    bound_box_dict = {
+        'Africa_MiddleEast_Meteorites': (-17.8, -35.2, 62.2, 37.6),
+        'Europe_Meteorites': (-24.1, 36, 32, 71.1),
+        'Upper_Asia_Meteorites': (32.2, 35.8, 190.4, 72.7),
+        'Lower_Asia_Meteorites': (58.2, -9.9, 154, 38.6),
+        'Australia_Meteorites': (112.9, -43.8, 154.3, -11.1),
+        'North_America_Meteorites': (-168.2, 12.8, -52, 71.5),
+        'South_America_Meteorites': (-81.2, -55.8, -34.4, 12.6)
+    }
+
+    for region, coordinates in bound_box_dict.items():
+        if coordinates[1] <= value_check(latitude) <= coordinates[3] and coordinates[0] <= value_check(longitude) <= coordinates[2]:
+            found_regions.append(region)
+    return found_regions
 
 
 def close_db(db_connection, db_cursor):
