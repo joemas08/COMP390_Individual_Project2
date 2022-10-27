@@ -1,6 +1,5 @@
 from handle_request_functions import *
 from database_handling_functions import *
-from util_functions import *
 
 
 def main():

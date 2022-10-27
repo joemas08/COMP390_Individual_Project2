@@ -13,10 +13,13 @@ def get_request(site_passed):
         return _request_code_handler(request_response_obj)
     except requests.exceptions.InvalidURL:
         print('The URL that was used had : Invalid URL Error')
+        exit()
     except requests.exceptions.ConnectionError:
         print('The URL that was used had : Connection Error')
+        exit()
     except requests.exceptions.MissingSchema:
-         print('The URL that was used had : Missing Schema Error')
+        print('The URL that was used had : Missing Schema Error')
+        exit()
 
 
 def _request_code_handler(request_response_obj):
@@ -27,24 +30,32 @@ def _request_code_handler(request_response_obj):
     request_response_status_code = request_response_obj.status_code
 
     if compare_request_code(request_response_status_code, 500, 600):
-        return f'Your request returned the code {request_response_status_code} : [{request_response_obj.reason}]'
+        print(f'Your request returned the code {request_response_status_code} : [{request_response_obj.reason}]')
+        exit()
 
     elif compare_request_code(request_response_status_code, 400, 500):
-        return f'Your request returned the code {request_response_status_code}: [{request_response_obj.reason}]'
+        print(f'Your request returned the code {request_response_status_code}: [{request_response_obj.reason}]')
+        exit()
 
     elif compare_request_code(request_response_status_code, 300, 400):
-        return f'Your request returned the code {request_response_status_code}: [{request_response_obj.reason}]'
+        print(f'Your request returned the code {request_response_status_code}: [{request_response_obj.reason}]')
+        exit()
 
     elif compare_request_code(request_response_status_code, 200, 300):
         return request_response_obj
 
     elif compare_request_code(request_response_status_code, 100, 200):
-        return f'Your request returned the code {request_response_status_code} : [{request_response_obj.reason}]'
+        print(f'Your request returned the code {request_response_status_code} : [{request_response_obj.reason}]')
+        exit()
     else:
         return 'There was an error with your request that is not recognized'
 
 
 def convert_to_json(response_obj: requests.Response):
+    """
+    Returns JSON content of response object passed in parameter. If error occurs, prints corresponding error message
+    with description
+    """
     json_content = None
 
     try:
