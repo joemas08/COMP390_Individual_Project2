@@ -14,7 +14,7 @@
   <li> Promptly closes database and exits program </li>
   <br>
 <h4>How to use the Project</h4>
-  <ul>From the command line use the prompt "python3 main.py"</ul>
+  <ul>After cloning the project and navigating to the cloned directory, from the command line use the prompt "python3 main.py"</ul>
 <br>
 <h4> Version of Python </h4>
   <ul>Python 3.10.0</ul>
