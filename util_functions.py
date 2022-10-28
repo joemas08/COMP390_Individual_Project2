@@ -1,11 +1,11 @@
-def compare_request_code(status_code_passed, lower, upper):
-    """Returns True if status code passed is within lower and upper bounds passed"""
-    if lower <= status_code_passed < upper:
-        return True
+"""
+This module assists with converting a string to an int or float.
+Only the value_check() function is available to outside files.
+"""
 
 
-def _check_int(string_passed):
-    """Returns True if string passed is an integer, otherwise returns False"""
+def _check_int(string_passed: str):
+    """ Returns True if string passed is an integer, otherwise returns False """
     try:
         int(string_passed)
         return True
@@ -15,7 +15,7 @@ def _check_int(string_passed):
 
 
 def _check_float(string_passed: str):
-    """Returns True if string passed is a float, otherwise returns False"""
+    """ Returns True if string passed is a float, otherwise returns False """
     try:
         float(string_passed)
         return True
@@ -24,7 +24,7 @@ def _check_float(string_passed: str):
 
 
 def value_check(value_passed: str):
-    """Returns integer if value passed was an integer, float if value passed was a float, otherwise returns 0"""
+    """ Returns integer if value passed was an integer, float if value passed was a float, otherwise returns 0 """
     if _check_int(value_passed):
         return int(value_passed)
 

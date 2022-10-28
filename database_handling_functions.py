@@ -1,10 +1,15 @@
+"""
+This module creates a sqlite3 database with tables for the 7 regions of all fallen meteorites from
+NASA data and correctly populates the region tables with meteorites that fell within their bounds.
+"""
+
 import sqlite3
 from util_functions import value_check
 
 
 def connect_to_database(db_name: str):
-    """Returns a database connection and database cursor to interact with database passed in parameter if connection
-    was successful. If error occurs, prints corresponding error message and description """
+    """ Returns a database connection and database cursor to interact with database passed in parameter if connection
+        was successful. If error occurs, prints corresponding error message and description """
     db_connection = None
     db_cursor = None
 
@@ -13,6 +18,8 @@ def connect_to_database(db_name: str):
         db_connection = sqlite3.connect(db_name)
         # creating cursor object to interact with connected database
         db_cursor = db_connection.cursor()
+
+        print(f'- Database: {db_name} connected\n')
 
     except sqlite3.Error as db_error:
         print(f'A database error has occurred : \n [{db_error}]')
@@ -23,7 +30,7 @@ def connect_to_database(db_name: str):
 
 
 def _create_table(db_connection: sqlite3.Connection, db_cursor: sqlite3.Cursor, table_name: str):
-    """ Creates a table of name passed to database using connection & cursor passed """
+    """ Creates a table of name passed in parameter to database using connection and cursor passed in parameter """
     try:
         db_cursor.execute(f'''CREATE TABLE IF NOT EXISTS {table_name}(
                             name TEXT,
@@ -31,8 +38,10 @@ def _create_table(db_connection: sqlite3.Connection, db_cursor: sqlite3.Cursor, 
                             reclat TEXT,
                             reclong TEXT);''')
 
-        # Clearing all data from table
+        # Clearing all data from table from previous runs of program
         db_cursor.execute(f'''DELETE FROM {table_name}''')
+
+        print(f'~ {table_name} table has been created\n')
 
     except sqlite3.Error as db_error:
         print(f'A database error has occurred : {db_error}')
@@ -52,12 +61,14 @@ def create_all_region_tables(db_connection: sqlite3.Connection, db_cursor: sqlit
 
 
 def insert_into_region_tables(db_connection: sqlite3.Connection, db_cursor: sqlite3.Cursor, json_content):
-    """
-    Inserts meteorites from JSON content passed into correct tables of database using connection and cursor passed
-    """
+    """ Inserts meteorites from JSON content passed into correct tables of database using the connection and cursor
+    passed. If error occurs, returns corresponding error message and closes any database connections before exiting
+    program """
     try:
         for meteorite in json_content:
+            # Checking number of attributes of current meteorite, if greater than 7 it must have latitude and longitude
             if len(meteorite) > 7:
+                # List returned has the region(s) that the current meteorite fell within and will be used to insert
                 regions = _find_region(meteorite)
                 for region in regions:
                     db_cursor.execute(f'''INSERT INTO {region} VALUES (?,?,?,?)''',
@@ -66,7 +77,7 @@ def insert_into_region_tables(db_connection: sqlite3.Connection, db_cursor: sqli
                                        meteorite.get('reclat', None),
                                        meteorite.get('reclong', None)))
                     db_connection.commit()
-
+        print('~ Database: meteorite_db.db has been populated with meteorite data\n')
     except sqlite3.Error as db_error:
         print(f'A database error has occurred : {db_error}')
         close_db(db_connection, db_cursor)
@@ -74,9 +85,13 @@ def insert_into_region_tables(db_connection: sqlite3.Connection, db_cursor: sqli
 
 
 def _find_region(meteorite):
-    """Finds region of meteorite passed in parameter, Returns list of found regions for meteorite"""
-    latitude = meteorite['reclat']
-    longitude = meteorite['reclong']
+    """ Finds region(s) for meteorite passed in parameter. Returns list of found region(s) for meteorite """
+
+    # Getting latitude and longitude of meteorite
+    meteor_latitude = meteorite['reclat']
+    meteor_longitude = meteorite['reclong']
+
+    # List that will be returned with regions that meteorite fell in
     found_regions = []
 
     # geolocation bounding box -- (left,bottom,right,top)
@@ -90,18 +105,21 @@ def _find_region(meteorite):
         'South_America_Meteorites': (-81.2, -55.8, -34.4, 12.6)
     }
 
+    # Iterating through regions dict and checking meteorite to see if it fell within the region's bounds.
+    # If so, adds region to found_region list
     for region, coordinates in bound_box_dict.items():
-        if coordinates[1] <= value_check(latitude) <= coordinates[3] and coordinates[0] <= value_check(longitude) <= \
-                coordinates[2]:
+        # left, bottom, right, and top bounds of region
+        left_bound, bottom_bound, right_bound, top_bound = coordinates[0], coordinates[1], coordinates[2], coordinates[3]
+        if bottom_bound <= value_check(meteor_latitude) <= top_bound and left_bound <= value_check(meteor_longitude) <= right_bound:
             found_regions.append(region)
     return found_regions
 
 
 def close_db(db_connection: sqlite3.Connection, db_cursor: sqlite3.Cursor):
-    """Closes database connection and database cursor passed in parameter if they are open"""
+    """ Closes database connection and database cursor passed in parameter if they are open """
     if db_cursor:
         db_connection.close()
 
     if db_connection:
         db_connection.close()
-        print('Database has been closed')
+        print('~ Database: meteorite_db.db has been closed')

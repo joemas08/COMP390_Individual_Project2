@@ -1,9 +1,19 @@
+"""This main module uses the URL and Database with it's imported functions to create a sqlite3 database and populate
+that database with content from the URL. Notifies user of each step as it happens.
+"""
+
 from handle_request_functions import *
 from database_handling_functions import *
 
 
 def main():
+    """This main function uses the hard coded url to send a GET request and then populate hard coded database with
+        JSON data from GET request """
+
+    # The target URL for GET request
     nasa_url = 'https://data.nasa.gov/resource/gh4g-9sfh.json'
+
+    # Database to be populated
     database = 'meteorite_db.db'
 
     # Acquiring response of GET request
